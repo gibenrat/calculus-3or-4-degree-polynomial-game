@@ -8,38 +8,125 @@
   <script defer src="./app.js"></script>
 </head>
 <body>
-  <header>
-    <strong>미적분 3·4차 다항함수 찾기 게임</strong>
-    <span style="opacity:.7">1단계(세션/채점) 구현</span>
-    <span id="hud" style="margin-left:auto; display:flex; gap:12px; align-items:center;">
+  <header class="topbar">
+    <div class="topbar__title">
+      <strong>미적분 3·4차 다항함수 찾기 게임</strong>
+      <span class="muted">힌트/점수/기록/Top10</span>
+    </div>
+
+    <div class="topbar__hud" id="hud">
+      <span id="hudPlayer">참가자: -</span>
       <span id="hudProgress">진행: -/-</span>
       <span id="hudScore">누적점수: 0</span>
-    </span>
+      <span id="hudRoundScore">이번문제 예상점수: 0</span>
+    </div>
   </header>
 
-  <main>
+  <main class="layout">
     <section class="panel">
-      <h2>그래프 영역(2단계에서 canvas)</h2>
-      <p style="opacity:.8">1단계에서는 그래프를 그리지 않습니다.</p>
-      <div id="equationBox" style="margin-top:12px; font-size:22px; font-weight:700;"></div>
-      <div id="roundMsg" style="margin-top:12px;"></div>
+      <h2>그래프 영역(3단계에서 canvas)</h2>
+      <p class="muted">2단계에서는 힌트/점수/기록이 핵심입니다. (그래프는 3단계)</p>
+
+      <div class="equation" id="equationBox"></div>
+
+      <div class="row gap">
+        <div class="pill">최고차항 A ∈ {-2,-1,1,2}</div>
+        <div class="pill">나머지 계수 |.| ≤ 4 (정수)</div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="panel subtle">
+        <div class="row between">
+          <div>
+            <div class="label">힌트 기록(순서)</div>
+            <div id="hintOrder" class="mono muted">-</div>
+          </div>
+          <div>
+            <div class="label">오답 횟수</div>
+            <div id="wrongCount" class="mono">0</div>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="label">힌트 결과</div>
+        <div id="hintLog" class="log"></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div id="roundMsg" class="roundMsg"></div>
     </section>
 
     <section class="panel">
       <h2>시작</h2>
-      <label for="studentId">이름 또는 학번</label><br>
-      <input id="studentId" placeholder="예: 2-3 김OO 또는 20260101" style="width:100%; margin:8px 0;">
-      <button id="startBtn" style="width:100%;">게임 시작</button>
+      <label class="label" for="studentId">이름 또는 학번 (둘 중 하나만 필수)</label>
+      <input id="studentId" placeholder="예: 2-3 김OO 또는 20260101" />
+      <button id="startBtn" class="primary">게임 시작</button>
 
-      <hr style="margin:16px 0;">
+      <hr class="hr">
 
       <h3>계수 입력</h3>
-      <div id="coeffForm" style="display:grid; gap:10px;"></div>
-      <button id="submitBtn" style="width:100%; margin-top:12px;" disabled>정답 제출</button>
+      <div id="coeffForm" class="coeffGrid"></div>
+      <button id="submitBtn" class="primary" disabled>정답 제출</button>
 
-      <div style="margin-top:16px;">
-        <h3>상태</h3>
-        <div id="statusBox">대기 중</div>
+      <div class="spacer"></div>
+
+      <h3>힌트 (각 1회, 4번은 2회)</h3>
+
+      <div class="hintGrid">
+        <button class="hintBtn" id="hint1">1) 극값 개수</button>
+        <button class="hintBtn" id="hint2">2) x→+∞ 극한</button>
+        <button class="hintBtn" id="hint3">3) x→-∞ 극한</button>
+
+        <button class="hintBtn" id="hint4">4) f(x) 값(최대 2회)</button>
+        <button class="hintBtn" id="hint5">5) 극값 곱 부호</button>
+        <button class="hintBtn" id="hint6">6) 두 계수 관계</button>
+
+        <button class="hintBtn" id="hint7">7) 세 계수 관계</button>
+        <button class="hintBtn" id="hint8">8) 증가구간(한 구간)</button>
+        <button class="hintBtn" id="hint9">9) y=k 교점 개수</button>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="panel subtle">
+        <div class="label">힌트 4 입력 (정수 x)</div>
+        <div class="row gap">
+          <input id="hint4x" placeholder="x (정수, 모든 정수 허용)" />
+          <button id="hint4go" class="ghost">실행</button>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="label">힌트 9 입력 (정수 k)</div>
+        <div class="row gap">
+          <input id="hint9k" placeholder="k (정수)" />
+          <button id="hint9go" class="ghost">실행</button>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <h3>상태</h3>
+      <div id="statusBox" class="status">대기 중</div>
+
+      <hr class="hr">
+
+      <h3>Top 10 랭킹(로컬)</h3>
+      <div class="muted small">동일 ID는 최고점만 유지</div>
+      <ol id="rankList" class="rankList"></ol>
+
+      <div class="spacer"></div>
+
+      <div class="panel subtle">
+        <div class="label">관리자(랭킹 초기화)</div>
+        <div class="row gap">
+          <input id="adminPin" placeholder="PIN 입력" />
+          <button id="resetRankBtn" class="danger">랭킹 초기화</button>
+        </div>
+        <div class="muted small">초기화는 랭킹만(플레이 로그는 유지)</div>
       </div>
     </section>
   </main>

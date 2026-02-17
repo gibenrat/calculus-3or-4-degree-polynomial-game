@@ -198,6 +198,51 @@ function drawGraph(problem) {
   if (0 >= yMin && 0 <= yMax) { const Y0 = toY(0); ctx.moveTo(0, Y0); ctx.lineTo(W, Y0); }
   ctx.stroke();
 
+  // ticks (x, y)
+  ctx.strokeStyle = "#e6e6e6";
+  ctx.fillStyle = "#777";
+  ctx.lineWidth = 1;
+
+  function niceStep(range) {
+    const rough = range / 8;
+    const pow = Math.pow(10, Math.floor(Math.log10(Math.max(rough, 1e-9))));
+    const n = rough / pow;
+    const step = (n < 1.5) ? 1 : (n < 3) ? 2 : (n < 7) ? 5 : 10;
+    return step * pow;
+  }
+
+  const xStep = niceStep(xMax - xMin);
+  const yStep = niceStep(yMax - yMin);
+
+  // vertical grid + x labels on x-axis (if visible), else at bottom
+  const yAxisY = (0 >= yMin && 0 <= yMax) ? toY(0) : (H - 16);
+
+  for (let xv = Math.ceil(xMin / xStep) * xStep; xv <= xMax; xv += xStep) {
+    const X = toX(xv);
+    ctx.beginPath();
+    ctx.moveTo(X, 0); ctx.lineTo(X, H);
+    ctx.stroke();
+
+    ctx.fillText(String(Math.round(xv * 100) / 100), X + 4, yAxisY - 4);
+  }
+
+  // horizontal grid + y labels on y-axis (if visible), else at left
+  const xAxisX = (0 >= xMin && 0 <= xMax) ? toX(0) : 6;
+
+  for (let yv = Math.ceil(yMin / yStep) * yStep; yv <= yMax; yv += yStep) {
+    const Y = toY(yv);
+    ctx.beginPath();
+    ctx.moveTo(0, Y); ctx.lineTo(W, Y);
+    ctx.stroke();
+
+    ctx.fillText(String(Math.round(yv * 100) / 100), xAxisX + 6, Y - 4);
+  }
+
+
+
+
+
+
   // curve
   ctx.strokeStyle = "#111";
   ctx.lineWidth = 2;
@@ -213,13 +258,39 @@ function drawGraph(problem) {
   ctx.stroke();
 
   // extrema dots
+   ctx.fillStyle = "#b00020";
+  ctx.strokeStyle = "#b00020";
+  ctx.lineWidth = 1;
+
+  ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
   ctx.fillStyle = "#b00020";
+
   for (const p of ex) {
     const X = toX(p.x), Y = toY(p.y);
+
+    // dot
     ctx.beginPath();
     ctx.arc(X, Y, 5, 0, Math.PI * 2);
     ctx.fill();
+
+    // label text (rounded)
+    const rx = Math.round(p.x * 100) / 100;
+    const ry = Math.round(p.y * 100) / 100;
+    const label = `(${rx}, ${ry})`;
+
+    // offset so it doesn't overlap the dot
+    const tx = X + 8;
+    const ty = Y - 10;
+
+    // light background for readability
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    const w = ctx.measureText(label).width + 8;
+    ctx.fillRect(tx - 4, ty - 12, w, 16);
+
+    ctx.fillStyle = "#b00020";
+    ctx.fillText(label, tx, ty);
   }
+
 }
 
 

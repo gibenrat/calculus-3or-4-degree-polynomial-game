@@ -699,6 +699,8 @@ function drawGraph(problem) {
   }
 
   function finishRound({ revealed }) {
+  drawGraph(state.current);   // ✅ 이 줄을 맨 위에 추가
+
     const h = state.usedHintsOrder.length;
     const roundScore = 5 + hintScoreFromCount(h) - 2 * state.wrongAttempts;
     state.roundScores[state.roundIndex] = roundScore;

@@ -17,8 +17,6 @@
 
   const $ = (id) => document.getElementById(id);
 
-const plot = document.getElementById("plot");
-const ctx = plot ? plot.getContext("2d") : null;
 
   // HUD
   const hudPlayer = $("hudPlayer");
@@ -801,7 +799,16 @@ function drawGraph(problem) {
 
   resetRankBtn.addEventListener("click", resetRank);
 
+let plot = null;
+let ctx = null;
+
+function bindCanvas() {
+  plot = document.getElementById("plot");
+  ctx = plot ? plot.getContext("2d") : null;
+}
+
   // init
+ bindCanvas(); 
   renderRank();
   updateHud();
   setStatus("대기 중");

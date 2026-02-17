@@ -17,6 +17,9 @@
 
   const $ = (id) => document.getElementById(id);
 
+const plot = document.getElementById("plot");
+const ctx = plot ? plot.getContext("2d") : null;
+
   // HUD
   const hudPlayer = $("hudPlayer");
   const hudProgress = $("hudProgress");
@@ -144,6 +147,84 @@ window.__state = state;
     }
     return s;
   }
+function getXRangeForNiceExtrema(problem) {
+  const ex = extremaPoints(problem);
+  if (ex.length >= 1) {
+    const xs = ex.map(p => p.x);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const pad = 2.5;
+    return { xMin: minX - pad, xMax: maxX + pad, ex };
+  }
+  return { xMin: -5, xMax: 5, ex: [] };
+}
+
+function sampleYRange(problem, xMin, xMax) {
+  let yMin = Infinity, yMax = -Infinity;
+  const N = 600;
+  for (let i = 0; i <= N; i++) {
+    const x = xMin + (xMax - xMin) * (i / N);
+    const y = polyEval(problem, x);
+    if (y < yMin) yMin = y;
+    if (y > yMax) yMax = y;
+  }
+  const pad = 0.12 * Math.max(1, yMax - yMin);
+  return { yMin: yMin - pad, yMax: yMax + pad };
+}
+
+function drawGraph(problem) {
+  if (!ctx || !plot) return;
+
+  const cssW = plot.clientWidth || 900;
+  const cssH = 480;
+  const dpr = window.devicePixelRatio || 1;
+  plot.width = Math.floor(cssW * dpr);
+  plot.height = Math.floor(cssH * dpr);
+  plot.style.height = cssH + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const { xMin, xMax, ex } = getXRangeForNiceExtrema(problem);
+  const { yMin, yMax } = sampleYRange(problem, xMin, xMax);
+
+  const W = cssW, H = cssH;
+  const toX = (x) => (x - xMin) / (xMax - xMin) * W;
+  const toY = (y) => H - (y - yMin) / (yMax - yMin) * H;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // axes
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "#ddd";
+  ctx.beginPath();
+  if (0 >= xMin && 0 <= xMax) { const X0 = toX(0); ctx.moveTo(X0, 0); ctx.lineTo(X0, H); }
+  if (0 >= yMin && 0 <= yMax) { const Y0 = toY(0); ctx.moveTo(0, Y0); ctx.lineTo(W, Y0); }
+  ctx.stroke();
+
+  // curve
+  ctx.strokeStyle = "#111";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  const N = 700;
+  for (let i = 0; i <= N; i++) {
+    const x = xMin + (xMax - xMin) * (i / N);
+    const y = polyEval(problem, x);
+    const X = toX(x), Y = toY(y);
+    if (i === 0) ctx.moveTo(X, Y);
+    else ctx.lineTo(X, Y);
+  }
+  ctx.stroke();
+
+  // extrema dots
+  ctx.fillStyle = "#b00020";
+  for (const p of ex) {
+    const X = toX(p.x), Y = toY(p.y);
+    ctx.beginPath();
+    ctx.arc(X, Y, 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+
 
   // Cauchy bound: 1 + max |a_i/a_n|
   function cauchyBound(powers, coeffs) {

@@ -1,4 +1,20 @@
 (() => {
+  // 🔧 hotfix: updateHud가 없을 때를 대비한 안전장치
+  function updateHud() {
+    try {
+      if (typeof updateHudInternal === "function") return updateHudInternal();
+      if (typeof updateHUD === "function") return updateHUD();
+      // 기본 HUD만 갱신(있으면)
+      const hudPlayer = document.getElementById("hudPlayer");
+      const hudProgress = document.getElementById("hudProgress");
+      const hudScore = document.getElementById("hudScore");
+      const hudRoundScore = document.getElementById("hudRoundScore");
+      if (hudPlayer && window.__state?.studentId) hudPlayer.textContent = `참가자: ${window.__state.studentId || "-"}`;
+      if (hudProgress && window.__state?.roundIndex != null) hudProgress.textContent = `진행: ${window.__state.started ? (window.__state.roundIndex + 1) : "-"} / 5`;
+      if (hudScore && window.__state?.totalScore != null) hudScore.textContent = `누적점수: ${window.__state.totalScore}`;
+    } catch (_) {}
+  }
+
   const $ = (id) => document.getElementById(id);
 
   // HUD
@@ -43,23 +59,26 @@
   const ADMIN_PIN = "3141";
   const RANK_KEY = "calc_poly_rank_v1";
 
-  const state = {
-    started: false,
-    studentId: "",
-    roundIndex: 0,
-    totalScore: 0,
+const state = {
+  started: false,
+  studentId: "",
+  roundIndex: 0,
+  totalScore: 0,
 
-    current: null,
-    wrongAttempts: 0,
+  current: null,
+  wrongAttempts: 0,
 
-    hintUsed: null,     // {1:true..9:true} except 4 uses count separately
-    hint4Count: 0,
-    usedHintsOrder: [], // list of hint numbers (4 can repeat)
-    hint4Queries: [],
-    hint9Queries: [],
+  hintUsed: null,
+  hint4Count: 0,
+  usedHintsOrder: [],
+  hint4Queries: [],
+  hint9Queries: [],
 
-    roundScores: [],
-  };
+  roundScores: [],
+};
+
+window.__state = state;
+
 
   // ---------- utils ----------
   const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;

@@ -3,10 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calulus Polynomial Game</title>
+  <title>미적분 다항함수 찾기 게임</title>
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./app.js"></script>
 </head>
 <body>
-  <h1>사이트 연결 성공</h1>
-  <p>index.html이 루트에 생기면 GitHub Pages 404는 사라집니다.</p>
+  <header>
+    <strong>미적분 3·4차 다항함수 찾기 게임</strong>
+    <span style="opacity:.7">Pages 테스트 화면</span>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>그래프 영역(추후 canvas)</h2>
+      <p>여기에 그래프가 들어갈 예정입니다.</p>
+    </section>
+
+    <section class="panel">
+      <h2>시작</h2>
+      <label>이름 또는 학번</label><br>
+      <input placeholder="예: 2-3 김OO 또는 20260101" style="width:100%; margin:8px 0;">
+      <button style="width:100%;">게임 시작(추후 구현)</button>
+
+      <div style="margin-top:16px;">
+        <h3>상태</h3>
+        <div id="app">JS 로딩 전</div>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

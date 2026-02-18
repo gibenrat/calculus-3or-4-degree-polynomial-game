@@ -864,6 +864,30 @@ function bindCanvas() {
   ctx = plot ? plot.getContext("2d") : null;
 }
 
+function updateHud() {
+  // 참가자/진행/누적/이번문제 예상점수 갱신
+  try {
+    if (hudPlayer) hudPlayer.textContent = `참가자: ${state.started ? state.studentId : "-"}`;
+    if (hudProgress) hudProgress.textContent = `진행: ${state.started ? (state.roundIndex + 1) : "-"} / ${TOTAL_ROUNDS}`;
+    if (hudScore) hudScore.textContent = `누적점수: ${state.totalScore}`;
+
+    // 예상점수(있으면)
+    if (hudRoundScore) {
+      if (!state.started || !state.current) {
+        hudRoundScore.textContent = `이번문제 예상점수: 0`;
+      } else {
+        const h = state.usedHintsOrder ? state.usedHintsOrder.length : 0;
+        const hintScore = (h <= 4) ? h : (8 - h);
+        const preview = 5 + hintScore - 2 * (state.wrongAttempts || 0);
+        hudRoundScore.textContent = `이번문제 예상점수: ${preview}`;
+      }
+    }
+  } catch (e) {
+    // 아무것도 하지 않음(화면만 유지)
+  }
+}
+
+
   // init
  bindCanvas(); 
   renderRank();
